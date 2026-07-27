@@ -8,7 +8,13 @@ export const Route = createRootRoute({
 })
 
 function RootComponent() {
-  const queryClient = new QueryClient()
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false, staleTime: 3 * 1000, gcTime: 5 * 1000 },
+      mutations: { retry: false },
+    },
+  })
+
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />

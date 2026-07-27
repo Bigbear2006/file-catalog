@@ -24,7 +24,7 @@ from file_catalog.schemas import (
 )
 from file_catalog.services.candidate import CandidateService
 
-PAGE_SIZE = 10
+PAGE_SIZE = 5
 
 
 class FileService:

@@ -1,8 +1,8 @@
 import { type QueryClient, useMutation } from '@tanstack/react-query'
-
-import { downloadFiles, getFileNames, markDownloadedFiles } from '@/api/file.ts'
 import { isAxiosError } from 'axios'
 import { toast } from 'sonner'
+
+import { downloadFiles, getFileNames, markDownloadedFiles } from '@/api/file.ts'
 
 interface UseDownloadFilesMutationOptions {
   queryClient: QueryClient

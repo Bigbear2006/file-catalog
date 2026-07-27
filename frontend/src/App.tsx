@@ -15,9 +15,8 @@ import { useFiles } from '@/hooks/queries/file.ts'
 import { Button } from './components/ui/button.tsx'
 
 function App() {
-  const pageParam = useSearch({ from: '/', select: (state) => state.page })
+  const page = useSearch({ from: '/', select: (state) => state.page }) || 1
 
-  const [page, setPage] = useState<number>(pageParam || 1)
   const [sorting, setSorting] = useState<FileSorting>(null)
   const [order, setOrder] = useState<SortingOrder>('DESC')
   const [filesWithStats, setFilesWithStats] = useState<number[] | boolean>([])
@@ -79,11 +78,7 @@ function App() {
         </Button>
         <TotalStatsCard fileList={fileList} />
 
-        <FileListPagination
-          page={page}
-          setPage={setPage}
-          totalPages={fileList.pages}
-        />
+        <FileListPagination page={page} totalPages={fileList.pages} />
       </div>
     </div>
   )

@@ -31,7 +31,6 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
     os.makedirs(config.FILES_DIR, exist_ok=True)
 
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
 
     async with sessionmaker() as session:
