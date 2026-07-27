@@ -10,6 +10,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button.tsx'
 import { displayDateTime } from '@/lib/fmt.ts'
+import { toast } from 'sonner'
 
 interface DownloadProgressProps {
   fileList: FileList
@@ -38,8 +39,8 @@ export function DownloadProgress({ fileList }: DownloadProgressProps) {
             из {fileNamesCount}
           </ProgressLabel>
           <p className="text-sm">
-            {fileList.files.length > 0
-              ? `Скачивание началось ${displayDateTime(fileList.files[0].downloadedAt, { sep: ' в ' })}`
+            {fileList.firstFileDownloadedAt
+              ? `Скачивание началось ${displayDateTime(fileList.firstFileDownloadedAt, { sep: ' в ' })} по Новосибирску (НСК)`
               : 'Скачивание ещё не началось'}
           </p>
         </div>
@@ -49,12 +50,15 @@ export function DownloadProgress({ fileList }: DownloadProgressProps) {
         onClick={
           downloadMutation.isPending
             ? undefined
-            : () => downloadMutation.mutate()
+            : () => {
+                downloadMutation.mutate()
+                toast.success('Все файлы загружены')
+              }
         }
       >
         {downloadMutation.isPending ? (
           <>
-            <Loader className="animate-spin" />
+            <Loader className="animate-spin-slow" />
             Данные скачиваются
           </>
         ) : (

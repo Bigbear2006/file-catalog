@@ -55,7 +55,6 @@ class Candidate(Base):
         String(255), unique=True, nullable=False, index=True
     )
     ip_address: Mapped[str | None] = mapped_column(String(45), nullable=True)
-    is_blocked: Mapped[bool] = mapped_column(default=False, nullable=False)
     blocked_until: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
@@ -73,7 +72,10 @@ class Candidate(Base):
     )
 
     def __repr__(self) -> str:
-        return f'<Candidate(id={self.id}, identifier={self.identifier})>'
+        return (
+            f'<Candidate(id={self.id}, identifier={self.identifier}, '
+            f'ip_address={self.ip_address})>'
+        )
 
 
 class DownloadedFile(Base):
@@ -107,4 +109,7 @@ class DownloadedFile(Base):
     )
 
     def __repr__(self) -> str:
-        return f'<DownloadedFile(candidate_id={self.candidate_id}, file_id={self.file_id})>'
+        return (
+            f'<DownloadedFile(candidate_id={self.candidate_id}, '
+            f'file_id={self.file_id})>'
+        )

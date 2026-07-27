@@ -1,4 +1,5 @@
 import io
+import math
 import os
 import random
 import string
@@ -23,10 +24,15 @@ from file_catalog.schemas import (
 )
 from file_catalog.services.candidate import CandidateService
 
+PAGE_SIZE = 10
+
 
 class FileService:
     def __init__(
-        self, session: AsyncSession, candidate_service: CandidateService, config: Config,
+        self,
+        session: AsyncSession,
+        candidate_service: CandidateService,
+        config: Config,
     ) -> None:
         self.session = session
         self.candidate_service = candidate_service
@@ -136,10 +142,15 @@ class FileService:
             .where(DownloadedFile.candidate_id == candidate_id)
         )
         total_result = await self.session.execute(total_stmt)
-        total = total_result.scalar() or 0
+        total_count = total_result.scalar() or 0
 
-        offset = (page - 1) * 10
-        limit = offset + 10
+        first_download_stmt = select(func.min(DownloadedFile.downloaded_at))
+        first_file_downloaded_at = await self.session.scalar(
+            first_download_stmt
+        )
+
+        offset = (page - 1) * PAGE_SIZE
+        limit = offset + PAGE_SIZE
         stmt = (
             select(DownloadedFile)
             .options(joinedload(DownloadedFile.file))
@@ -191,7 +202,11 @@ class FileService:
             for f in files
         ]
         return FileListResponse(
-            files=file_list, total=total, stats=general_stats
+            files=file_list,
+            total=total_count,
+            pages=math.ceil(total_count / PAGE_SIZE),
+            first_file_downloaded_at=first_file_downloaded_at,
+            stats=general_stats,
         )
 
     async def mark_downloaded_files(

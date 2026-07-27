@@ -42,12 +42,16 @@ interface FileListResponse {
   files: FileResponse[]
   stats?: NumberStats[]
   total: number
+  pages: number
+  first_file_downloaded_at?: string
 }
 
 export interface FileList {
   files: File[]
   stats?: NumberStats[]
   total: number
+  pages: number
+  firstFileDownloadedAt?: Date
 }
 
 export async function getDownloadedFiles(
@@ -65,6 +69,10 @@ export async function getDownloadedFiles(
     })),
     stats: rsp.data.stats,
     total: rsp.data.total,
+    pages: rsp.data.pages,
+    firstFileDownloadedAt: rsp.data.first_file_downloaded_at
+      ? new Date(rsp.data.first_file_downloaded_at)
+      : undefined,
   }
 }
 

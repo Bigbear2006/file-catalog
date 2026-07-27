@@ -7,7 +7,7 @@ import {
   ChevronRightIcon,
   MoreHorizontalIcon,
 } from 'lucide-react'
-import {Link} from "@tanstack/react-router";
+import { Link } from '@tanstack/react-router'
 
 function Pagination({ className, ...props }: React.ComponentProps<'nav'>) {
   return (
@@ -41,7 +41,7 @@ function PaginationItem({ ...props }: React.ComponentProps<'li'>) {
 type PaginationLinkProps = {
   isActive?: boolean
 } & Pick<React.ComponentProps<typeof Button>, 'size'> &
-  React.ComponentProps<typeof Link>
+  Omit<React.ComponentProps<typeof Link>, 'search'> & { search?: any }
 
 function PaginationLink({
   className,

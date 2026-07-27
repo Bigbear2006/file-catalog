@@ -4,6 +4,7 @@ import { displayDateTime } from '@/lib/fmt.ts'
 import { Checkbox } from '@/components/ui/checkbox.tsx'
 import type { Dispatch, SetStateAction } from 'react'
 import { NumberStartCard } from '@/components/NumberStartCard.tsx'
+import { toast } from 'sonner'
 
 interface FileCardProps {
   file: File
@@ -44,7 +45,13 @@ export function FileCard({
                 if (checked) {
                   return prev ? prev : [file.id]
                 }
-                return [file.id]
+                // If filesWithStats === true and checked === false
+                if (prev) {
+                  toast.warning(
+                    'Нельзя убирать файлы из выборки пока стоит галочка в поле "Выбрать все файлы"',
+                  )
+                }
+                return prev
               }
               return checked
                 ? [...prev, file.id]

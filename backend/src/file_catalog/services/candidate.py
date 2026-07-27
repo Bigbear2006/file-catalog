@@ -10,7 +10,9 @@ from file_catalog.models import Candidate
 
 
 class CandidateService:
-    def __init__(self, session: AsyncSession, request: Request, config: Config):
+    def __init__(
+        self, session: AsyncSession, request: Request, config: Config
+    ):
         self.session = session
         self.request = request
         self.config = config
@@ -20,7 +22,10 @@ class CandidateService:
         x_candidate_id: str | None = None,
         ip_address: str | None = None,
     ) -> Candidate:
-        stmt = select(Candidate).where((Candidate.identifier == x_candidate_id) | (Candidate.ip_address == ip_address) )
+        stmt = select(Candidate).where(
+            (Candidate.identifier == x_candidate_id)
+            | (Candidate.ip_address == ip_address)
+        )
         result = await self.session.execute(stmt)
         candidate = result.scalar_one_or_none()
 
@@ -76,7 +81,8 @@ class CandidateService:
                 )
                 await self.session.commit()
                 raise RateLimitExceeded(
-                    retry_after=self.config.BLOCK_DURATION_SECONDS, blocked=True
+                    retry_after=self.config.BLOCK_DURATION_SECONDS,
+                    blocked=True,
                 )
             candidate.request_count += 1
         else:

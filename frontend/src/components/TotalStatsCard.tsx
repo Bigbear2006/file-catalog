@@ -9,7 +9,7 @@ import {
 import { NumberStartCard } from '@/components/NumberStartCard.tsx'
 
 interface TotalStatsCardProps {
-  fileList: FileList;
+  fileList: FileList
 }
 
 export function TotalStatsCard({ fileList }: TotalStatsCardProps) {

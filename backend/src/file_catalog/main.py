@@ -1,17 +1,22 @@
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import Any
 
 import uvicorn
 from dishka.integrations.fastapi import setup_dishka
-from fastapi import FastAPI, Request, Response
-from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker, AsyncSession
+from fastapi import FastAPI
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+)
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from file_catalog.api import api_router
 from file_catalog.api.exceptions import setup_exception_handler
 from file_catalog.config import Config
 from file_catalog.di.container import container
+from file_catalog.logging import configure_logging, logger
+from file_catalog.middleware import cors_middleware
 from file_catalog.models import Base
 from file_catalog.services import FileService
 
@@ -28,32 +33,20 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
     async with sessionmaker() as session:
         # Do not pass candidate_service, because it isn't needed
         # in .create_or_update_files()
-        file_service = FileService(session, candidate_service=None, config=config)  # type: ignore[arg-type]
+        file_service = FileService(
+            session,
+            candidate_service=None,  # type: ignore[arg-type]
+            config=config,
+        )
         await file_service.create_or_update_files()
 
     yield
 
-    app.state.dishka_container.close()
-
-
-async def cors_middleware(request: Request, call_next: Any) -> Response:
-    if request.method == 'OPTIONS':
-        rsp = Response()
-    else:
-        rsp = await call_next(request)
-
-    origin = request.headers.get('origin')
-    if origin and 'localhost:5173' in origin:
-        rsp.headers['Access-Control-Allow-Origin'] = origin
-        rsp.headers['Access-Control-Allow-Credentials'] = 'true'
-        rsp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
-        rsp.headers['Access-Control-Allow-Methods'] = (
-            'GET,POST,OPTIONS,PUT,PATCH,DELETE'
-        )
-    return rsp
+    await _app.state.dishka_container.close()
 
 
 def create_app() -> FastAPI:
+    configure_logging()
     app = FastAPI(
         title='File Catalog API',
         version='0.1.0',
@@ -69,6 +62,7 @@ def create_app() -> FastAPI:
 
 
 if __name__ == '__main__':
+    logger.info('Application started')
     uvicorn.run(
         app=create_app(),
         host='0.0.0.0',

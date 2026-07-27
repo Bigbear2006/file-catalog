@@ -1,0 +1,22 @@
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: 'v0.15.22'
+    hooks:
+      - id: ruff-check
+        args: [--fix, --config=backend/pyproject.toml]
+        files: ^backend/src/
+      - id: ruff-format
+        args: [--config=backend/pyproject.toml]
+        files: ^backend/
+
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy
+        entry: mypy
+        args: [--show-traceback, --config-file=backend/pyproject.toml]
+        files: ^backend/src/
+        language: system
+        types: [python]
+        pass_filenames: true
+        require_serial: true

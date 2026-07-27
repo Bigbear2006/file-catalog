@@ -15,7 +15,9 @@ from file_catalog.schemas import (
 )
 from file_catalog.services import FileService
 
-file_router = APIRouter(prefix='/files', tags=['Файлы'], route_class=DishkaRoute)
+file_router = APIRouter(
+    prefix='/files', tags=['Файлы'], route_class=DishkaRoute
+)
 
 
 @file_router.get(

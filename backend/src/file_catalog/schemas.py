@@ -83,8 +83,10 @@ class FileResponse(BaseModel):
 
 class FileListResponse(BaseModel):
     files: list[FileResponse] = Field(default_factory=list)
-    stats: list[NumberStatsResponse] | None = None
-    total: int = Field(..., ge=0)
+    stats: list[NumberStatsResponse] | None
+    total: int
+    pages: int
+    first_file_downloaded_at: datetime | None
 
 
 class FileSorting(StrEnum):

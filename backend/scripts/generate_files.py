@@ -22,7 +22,7 @@ def main() -> None:
 
     os.makedirs(config.FILES_DIR, exist_ok=True)
 
-    for i in range(args.count):
+    for _ in range(args.count):
         with open(config.FILES_DIR / f'{uuid.uuid4()}.txt', 'w') as file:
             content = ''.join(
                 [random.choice(string.digits) for _ in range(FILE_LENGTH)]

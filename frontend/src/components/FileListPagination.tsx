@@ -7,6 +7,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination.tsx'
 import type { Dispatch, SetStateAction } from 'react'
+import { Link } from '@tanstack/react-router'
 
 interface FileListPaginationProps {
   page: number
@@ -23,13 +24,14 @@ export function FileListPagination({
     <Pagination>
       <PaginationContent>
         <PaginationItem>
-          <PaginationPrevious to='.' search={{page: page - 1}} text="Назад" />
+          <Link to="." search={{ page: page - 1 }} />
+          <PaginationPrevious to="." search={{ page: page - 1 }} text="Назад" />
         </PaginationItem>
         {new Array(totalPages).fill(0).map((_, index) => (
           <PaginationItem key={index + 1}>
             <PaginationLink
-              to='.'
-              search={{page: index + 1}}
+              to="."
+              search={{ page: index + 1 }}
               isActive={index + 1 === page}
               onClick={() => setPage(index + 1)}
             >
@@ -38,7 +40,7 @@ export function FileListPagination({
           </PaginationItem>
         ))}
         <PaginationItem>
-          <PaginationNext to='.' search={{page: page + 1}} text="Вперёд" />
+          <PaginationNext to="." search={{ page: page + 1 }} text="Вперёд" />
         </PaginationItem>
       </PaginationContent>
     </Pagination>

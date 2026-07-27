@@ -10,10 +10,11 @@ import { FileListPagination } from '@/components/FileListPagination.tsx'
 import { Loader } from 'lucide-react'
 import { SelectFiles } from '@/components/SelectFiles.tsx'
 import { TotalStatsCard } from '@/components/TotalStatsCard.tsx'
-import {useSearch} from "@tanstack/react-router";
+import { useSearch } from '@tanstack/react-router'
+import { toast } from 'sonner'
 
 function App() {
-  const pageParam = useSearch({from: '/', select: state => state.page})
+  const pageParam = useSearch({ from: '/', select: (state) => state.page })
 
   const [page, setPage] = useState<number>(pageParam || 1)
   const [sorting, setSorting] = useState<FileSorting>(null)
@@ -67,7 +68,12 @@ function App() {
           fileList={fileList}
           setFilesWithStats={setFilesWithStats}
         />
-        <Button onClick={() => setDebouncedFilesWithStats(filesWithStats)}>
+        <Button
+          onClick={() => {
+            setDebouncedFilesWithStats(filesWithStats)
+            toast.info('Расчёты произведены')
+          }}
+        >
           Произвести расчёты
         </Button>
         <TotalStatsCard fileList={fileList} />
@@ -75,7 +81,7 @@ function App() {
         <FileListPagination
           page={page}
           setPage={setPage}
-          totalPages={Math.ceil(fileList.total / 5)}
+          totalPages={fileList.pages}
         />
       </div>
     </div>
