@@ -1,10 +1,8 @@
 import argparse
 import os
-import random
-import string
-import uuid
 
 from file_catalog.config import Config
+from file_catalog.db import generate_files
 from file_catalog.di.container import container
 
 FILE_LENGTH = 500
@@ -21,14 +19,9 @@ def main() -> None:
     args = parser.parse_args()
 
     os.makedirs(config.FILES_DIR, exist_ok=True)
-
-    for _ in range(args.count):
-        with open(config.FILES_DIR / f'{uuid.uuid4()}.txt', 'w') as file:
-            content = ''.join(
-                [random.choice(string.digits) for _ in range(FILE_LENGTH)]
-            )
-            file.write(content)
-
+    generate_files(
+        args.count, file_length=FILE_LENGTH, files_dir=config.FILES_DIR
+    )
     print(f'Generated {args.count} files')
 
 

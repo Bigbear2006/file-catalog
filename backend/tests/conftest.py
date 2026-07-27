@@ -1,3 +1,4 @@
+import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from json import JSONDecodeError
@@ -6,7 +7,7 @@ from typing import Any
 import httpx
 import pytest
 from file_catalog.config import Config
-from file_catalog.db import init_db
+from file_catalog.db import generate_files, init_db
 from file_catalog.main import create_app
 from file_catalog.models import Base
 from httpx import URL, ASGITransport, AsyncClient
@@ -22,6 +23,10 @@ def anyio_backend() -> str:
 
 @pytest.fixture(scope='session', autouse=True)
 async def setup_db() -> AsyncIterator[None]:
+    config = test_container.get_sync(Config)
+    os.makedirs(config.FILES_DIR, exist_ok=True)
+    if not os.listdir(config.FILES_DIR):
+        generate_files(5, file_length=500, files_dir=config.FILES_DIR)
     await init_db(test_container)
 
     yield
