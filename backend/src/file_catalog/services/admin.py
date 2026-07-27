@@ -9,19 +9,21 @@ class AdminService:
         self.session = session
 
     async def reset_candidate_progress(self, identifier: str) -> bool:
-        stmt = select(Candidate).where(Candidate.identifier == identifier)
+        stmt = select(Candidate).where(
+            (Candidate.identifier == identifier)
+            | (Candidate.ip_address == identifier)
+        )
         result = await self.session.execute(stmt)
         candidate = result.scalar_one_or_none()
         if not candidate:
             return False
 
-        # Delete downloaded files for this candidate
         await self.session.execute(
             delete(DownloadedFile).where(
                 DownloadedFile.candidate_id == candidate.id
             )
         )
-        # Reset candidate stats
+
         candidate.request_count = 0
         candidate.blocked_until = None
         candidate.last_request_at = None
@@ -29,14 +31,12 @@ class AdminService:
         return True
 
     async def unblock_client(self, ip_address: str) -> bool:
-        stmt = select(Candidate).where(
-            Candidate.ip_address == ip_address,
-            Candidate.blocked_until.isnot(None),
-        )
+        stmt = select(Candidate).where(Candidate.ip_address == ip_address)
         result = await self.session.execute(stmt)
         candidate = result.scalar_one_or_none()
         if not candidate:
             return False
+
         candidate.blocked_until = None
         candidate.request_count = 0
         await self.session.commit()

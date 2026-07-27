@@ -39,6 +39,8 @@ services:
     volumes:
       - ./build:/var/www/build
       - ./nginx/ssl:/etc/ssl
+    env_file:
+      - frontend/.env
     depends_on:
       - backend
 

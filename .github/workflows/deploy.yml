@@ -9,6 +9,21 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:17.4
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
@@ -20,10 +35,18 @@ jobs:
           cd backend
           pip install --no-cache-dir --upgrade pip
           pip install --no-cache-dir uv
-          uv pip install -e . --system --group dev
+          uv pip install -e . --system --group dev --group test
+
+      - name: Create .env file
+        run: echo "${{ secrets.TEST_ENV }}" > backend/.env
 
       - name: Run pre-commit
         run: pre-commit run --all-files
+
+      - name: Run tests
+        run: |
+          cd backend
+          pytest tests
 
   deploy:
     runs-on: ubuntu-latest

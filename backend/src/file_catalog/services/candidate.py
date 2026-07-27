@@ -37,7 +37,6 @@ class CandidateService:
                 await self.session.commit()
             return candidate
 
-        # Create new candidate
         candidate = Candidate(
             identifier=x_candidate_id or '',
             ip_address=ip_address,
@@ -67,7 +66,6 @@ class CandidateService:
             seconds=self.config.RATE_LIMIT_WINDOW_SECONDS
         )
 
-        # Check if currently blocked
         if candidate.blocked_until and candidate.blocked_until > now:
             retry_after = int((candidate.blocked_until - now).total_seconds())
             raise RateLimitExceeded(retry_after=retry_after, blocked=True)
@@ -78,7 +76,6 @@ class CandidateService:
             and candidate.last_request_at >= window_start
         ):
             if candidate.request_count >= self.config.RATE_LIMIT_REQUESTS:
-                # Block the candidate
                 candidate.blocked_until = now + timedelta(
                     seconds=self.config.BLOCK_DURATION_SECONDS
                 )

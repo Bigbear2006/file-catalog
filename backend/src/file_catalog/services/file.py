@@ -8,7 +8,7 @@ import zipfile
 from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import contains_eager, joinedload
 
 from file_catalog.config import Config
 from file_catalog.exceptions import FileNotFound
@@ -72,14 +72,13 @@ class FileService:
         self, min_count: int = 3, max_count: int = 9
     ) -> FileNamesResponse:
         candidate_id = await self.candidate_service.get_current_candidate_id()
-        # Get IDs of files already downloaded by this candidate
+
         downloaded_stmt = select(DownloadedFile.file_id).where(
             DownloadedFile.candidate_id == candidate_id
         )
         downloaded_result = await self.session.execute(downloaded_stmt)
         downloaded_ids = {row[0] for row in downloaded_result.fetchall()}
 
-        # Get available files (not downloaded by this candidate)
         if downloaded_ids:
             stmt = select(File.id, File.name).where(
                 ~File.id.in_(downloaded_ids)
@@ -93,7 +92,6 @@ class FileService:
         if not available_files:
             return FileNamesResponse()
 
-        # Randomly select between min_count and max_count files
         count = min(random.randint(min_count, max_count), len(available_files))
         selected = random.sample(available_files, count)
 
@@ -123,7 +121,6 @@ class FileService:
                     with open(file_path, 'rb') as f:
                         zip_file.writestr(file.name, f.read())
                 else:
-                    # File content stored in DB
                     zip_file.writestr(file.name, file.content)
 
         zip_buffer.seek(0)
@@ -219,8 +216,9 @@ class FileService:
 
         result = await self.session.scalars(
             select(DownloadedFile)
-            .options(joinedload(DownloadedFile.file))
+            .join(File)
             .where(File.name.in_(names))
+            .options(contains_eager(DownloadedFile.file))
         )
         already_downloaded = result.all()
         already_downloaded_names = [i.file.name for i in already_downloaded]
