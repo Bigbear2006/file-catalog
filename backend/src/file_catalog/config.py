@@ -21,8 +21,8 @@ class Config:
     FILES_DIR: Path = field(default_factory=lambda: env.path('FILES_DIR'))
     ADMIN_TOKEN: str = field(default_factory=lambda: env('ADMIN_TOKEN'))
 
-    RATE_LIMIT_REQUESTS: int = 10
-    RATE_LIMIT_WINDOW_SECONDS: int = 60
+    RATE_LIMIT_REQUESTS: int = 20
+    RATE_LIMIT_WINDOW_SECONDS: int = 5
     BLOCK_DURATION_SECONDS: int = 1800
 
     @property

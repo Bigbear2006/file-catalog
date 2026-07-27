@@ -34,7 +34,7 @@ export function DownloadProgress({ fileList }: DownloadProgressProps) {
 
   return (
     <div className="flex flex-col gap-2">
-      <Progress value={((fileList.total / fileNamesCount) * 100) || 0}>
+      <Progress value={(fileList.total / fileNamesCount) * 100 || 0}>
         <div className="text-left">
           <ProgressLabel>
             получено {fileNamesCount} названий файлов, скачано {fileList.total}{' '}

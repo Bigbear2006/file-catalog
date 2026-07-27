@@ -81,7 +81,9 @@ interface DownloadFilesRequest {
 }
 
 export async function downloadFiles(data: DownloadFilesRequest) {
-  await axiosInstance.post('/files/download', data)
+  return await axiosInstance.post('/files/download', data, {
+    responseType: 'blob',
+  })
 }
 
 interface MarkDownloadedFilesRequest extends DownloadFilesRequest {}

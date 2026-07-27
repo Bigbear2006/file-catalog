@@ -35,7 +35,7 @@ function App() {
   if (!fileList) {
     return (
       <div className="py-20 flex gap-4 text-center justify-center items-center">
-        <Loader className="animate-spin" size={40} />
+        <Loader className="animate-spin-slow" size={40} />
         <h1 className="text-xl">Загрузка...</h1>
       </div>
     )
