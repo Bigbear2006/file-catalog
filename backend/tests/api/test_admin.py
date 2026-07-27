@@ -2,7 +2,7 @@ import pytest
 from httpx import AsyncClient
 
 
-@pytest.mark.order(after='test_file')
+@pytest.mark.order(after='test_file.py::test_file')
 @pytest.mark.anyio
 async def test_admin(
     client: AsyncClient,

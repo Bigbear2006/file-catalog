@@ -3,11 +3,14 @@ import math
 import os
 import random
 import string
+import uuid
 import zipfile
+from pathlib import Path
 
+from dishka import AsyncContainer
 from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.orm import contains_eager, joinedload
 
 from file_catalog.config import Config
@@ -144,7 +147,7 @@ class FileService:
         total_result = await self.session.execute(total_stmt)
         total_count = total_result.scalar() or 0
 
-        first_download_stmt = select(func.min(DownloadedFile.downloaded_at))
+        first_download_stmt = select(func.min(DownloadedFile.created_at))
         first_file_downloaded_at = await self.session.scalar(
             first_download_stmt
         )
@@ -160,7 +163,7 @@ class FileService:
         )
 
         if sorting == FileSorting.DOWNLOADED_AT:
-            col = DownloadedFile.downloaded_at
+            col = DownloadedFile.created_at
             order_by = col.asc() if order == SortingOrder.ASC else col.desc()
             stmt = stmt.order_by(order_by)
 
@@ -196,7 +199,7 @@ class FileService:
             FileResponse(
                 id=f.file.id,
                 name=f.file.name,
-                downloaded_at=f.downloaded_at,
+                downloaded_at=f.created_at,
                 stats=stats_by_file_id.get(f.id),
             )
             for f in files
@@ -241,3 +244,27 @@ class FileService:
         return MarkDownloadedResponse(
             marked=len(new), already_marked=len(already_downloaded)
         )
+
+
+def generate_files(count: int, *, file_length: int, files_dir: Path) -> None:
+    for _ in range(count):
+        with open(files_dir / f'{uuid.uuid4()}.txt', 'w') as file:
+            content = ''.join(
+                [random.choice(string.digits) for _ in range(file_length)]
+            )
+            file.write(content)
+
+
+async def load_files(container: AsyncContainer) -> None:
+    config = container.get_sync(Config)
+    sessionmaker = await container.get(async_sessionmaker[AsyncSession])
+
+    async with sessionmaker() as session:
+        # Do not pass candidate_service, because it isn't needed
+        # in .create_or_update_files()
+        file_service = FileService(
+            session,
+            candidate_service=None,  # type: ignore[arg-type]
+            config=config,
+        )
+        await file_service.create_or_update_files()

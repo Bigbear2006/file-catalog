@@ -2,7 +2,6 @@ import pytest
 from httpx import AsyncClient
 
 
-@pytest.mark.order(2)
 @pytest.mark.anyio
 async def test_file(
     client: AsyncClient, candidate_headers: dict[str, str]

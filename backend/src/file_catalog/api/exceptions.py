@@ -23,7 +23,7 @@ async def rate_limit_handler(
         else status.HTTP_429_TOO_MANY_REQUESTS
     )
     return JSONResponse(
-        content={'detail': exc.args[0], 'retry_after': exc.retry_after},
+        content={'detail': exc.args[0]},
         status_code=status_code,
         headers=headers,
     )

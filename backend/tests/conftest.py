@@ -1,4 +1,5 @@
 import os
+import shutil
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from json import JSONDecodeError
@@ -6,10 +7,11 @@ from typing import Any
 
 import httpx
 import pytest
+from alembic import command
+from alembic.config import Config as AlembicConfig
 from file_catalog.config import Config
-from file_catalog.db import generate_files, init_db
 from file_catalog.main import create_app
-from file_catalog.models import Base
+from file_catalog.services.file import generate_files, load_files
 from httpx import URL, ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncEngine
 
@@ -25,15 +27,30 @@ def anyio_backend() -> str:
 async def setup_db() -> AsyncIterator[None]:
     config = test_container.get_sync(Config)
     os.makedirs(config.FILES_DIR, exist_ok=True)
-    if not os.listdir(config.FILES_DIR):
-        generate_files(5, file_length=500, files_dir=config.FILES_DIR)
-    await init_db(test_container)
+    generate_files(5, file_length=500, files_dir=config.FILES_DIR)
 
-    yield
+    app_config = test_container.get_sync(Config)
+    alembic_config = AlembicConfig('alembic.ini')
+    section = alembic_config.config_ini_section
+    alembic_config.set_section_option(
+        section,
+        'DATABASE_URL',
+        app_config.database_url,
+    )
 
     engine = await test_container.get(AsyncEngine)
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
+    async with engine.connect() as conn:
+        await conn.run_sync(lambda _: command.upgrade(alembic_config, 'head'))
+
+    await load_files(test_container)
+    try:
+        yield
+    finally:
+        async with engine.connect() as conn:
+            await conn.run_sync(
+                lambda _: command.downgrade(alembic_config, 'base')
+            )
+        shutil.rmtree(config.FILES_DIR)
 
 
 class CustomAsyncClient(AsyncClient):

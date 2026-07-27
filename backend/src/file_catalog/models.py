@@ -93,11 +93,6 @@ class DownloadedFile(Base):
         nullable=False,
         index=True,
     )
-    downloaded_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=func.now(),
-        nullable=False,
-    )
 
     candidate: Mapped['Candidate'] = relationship(
         'Candidate', back_populates='downloads'

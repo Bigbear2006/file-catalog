@@ -2,8 +2,8 @@ import argparse
 import os
 
 from file_catalog.config import Config
-from file_catalog.db import generate_files
 from file_catalog.di.container import container
+from file_catalog.services.file import generate_files
 
 FILE_LENGTH = 500
 

@@ -1,7 +1,7 @@
 [project]
 name = "file-catalog"
-version = "0.1.0"
-description = "File Catalog API"
+version = "1.0.0"
+description = "Сайт для скачивания и анализа текстовых файлов"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
@@ -11,7 +11,6 @@ dependencies = [
     "asyncpg>=0.29.0",
     "alembic>=1.13.0",
     "environs>=11.0.0",
-    "python-multipart>=0.0.9",
     "dishka>=1.10.1",
 ]
 

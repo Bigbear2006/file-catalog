@@ -39,7 +39,7 @@ export function useDownloadFilesMutation({
           throw err
         }
 
-        const retryAfter = parseInt(err.response.data.retry_after)
+        const retryAfter = parseInt(err.response.headers['Retry-After'])
         const retryAfterStr = Number.isNaN(retryAfter)
           ? ''
           : ` Попробуйте снова через ${retryAfter} секунд`

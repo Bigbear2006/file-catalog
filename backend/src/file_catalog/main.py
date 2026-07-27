@@ -9,15 +9,15 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from file_catalog.api import api_router
 from file_catalog.api.exceptions import setup_exception_handler
-from file_catalog.db import init_db
 from file_catalog.di.container import container
 from file_catalog.logging import configure_logging, logger
 from file_catalog.middleware import cors_middleware
+from file_catalog.services.file import load_files
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
-    await init_db(container)
+    await load_files(container)
     yield
     await _app.state.dishka_container.close()
 
