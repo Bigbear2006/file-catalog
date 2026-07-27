@@ -53,6 +53,9 @@ class FileService:
             size = os.path.getsize(full_path)
             files.append({'name': filename, 'content': content, 'size': size})
 
+        if not files:
+            return
+
         stmt = insert(File).values(files)
         stmt = stmt.on_conflict_do_update(
             index_elements=[File.name],
