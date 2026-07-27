@@ -34,7 +34,7 @@ export function DownloadProgress({ fileList }: DownloadProgressProps) {
 
   return (
     <div className="flex flex-col gap-2">
-      <Progress value={(fileList.total / fileNamesCount) * 100}>
+      <Progress value={((fileList.total / fileNamesCount) * 100) || 0}>
         <div className="text-left">
           <ProgressLabel>
             получено {fileNamesCount} названий файлов, скачано {fileList.total}{' '}
@@ -49,14 +49,12 @@ export function DownloadProgress({ fileList }: DownloadProgressProps) {
         <ProgressValue />
       </Progress>
       <Button
-        onClick={
-          downloadMutation.isPending
-            ? undefined
-            : () => {
-                downloadMutation.mutate()
-                toast.success('Все файлы загружены')
-              }
+        onClick={() =>
+          downloadMutation
+            .mutateAsync()
+            .then(() => toast.success('Все файлы загружены'))
         }
+        disabled={downloadMutation.isPending}
       >
         {downloadMutation.isPending ? (
           <>

@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from file_catalog.config import Config
 from file_catalog.exceptions import RateLimitExceeded
+from file_catalog.logging import logger
 from file_catalog.models import Candidate
 
 
@@ -22,10 +23,11 @@ class CandidateService:
         x_candidate_id: str | None = None,
         ip_address: str | None = None,
     ) -> Candidate:
-        stmt = select(Candidate).where(
-            (Candidate.identifier == x_candidate_id)
-            | (Candidate.ip_address == ip_address)
-        )
+        filter_ = Candidate.ip_address == ip_address
+        if x_candidate_id:
+            filter_ |= Candidate.identifier == x_candidate_id
+
+        stmt = select(Candidate).where(filter_)
         result = await self.session.execute(stmt)
         candidate = result.scalar_one_or_none()
 
@@ -37,11 +39,12 @@ class CandidateService:
 
         # Create new candidate
         candidate = Candidate(
-            identifier=x_candidate_id,
+            identifier=x_candidate_id or '',
             ip_address=ip_address,
         )
         self.session.add(candidate)
         await self.session.commit()
+        logger.info(f'Created candidate {candidate}')
         return candidate
 
     async def get_current_candidate(self) -> Candidate:
