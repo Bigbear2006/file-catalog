@@ -1,6 +1,7 @@
+import type { Dispatch, SetStateAction } from 'react'
+
 import type { FileList } from '@/api/file.ts'
 import { Checkbox } from '@/components/ui/checkbox.tsx'
-import type { Dispatch, SetStateAction } from 'react'
 
 interface SelectFilesProps {
   fileList: FileList

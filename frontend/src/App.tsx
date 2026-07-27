@@ -1,17 +1,18 @@
-import { Button } from './components/ui/button.tsx'
-
+import { useSearch } from '@tanstack/react-router'
+import { Loader } from 'lucide-react'
 import { useState } from 'react'
+import { toast } from 'sonner'
+
 import { type FileSorting, type SortingOrder } from '@/api/file.ts'
-import { useFiles } from '@/hooks/queries/file.ts'
 import { DownloadProgress } from '@/components/DownloadProgress.tsx'
-import { SortingSelect } from '@/components/SortingSelect.tsx'
 import { FileCard } from '@/components/FileCard.tsx'
 import { FileListPagination } from '@/components/FileListPagination.tsx'
-import { Loader } from 'lucide-react'
 import { SelectFiles } from '@/components/SelectFiles.tsx'
+import { SortingSelect } from '@/components/SortingSelect.tsx'
 import { TotalStatsCard } from '@/components/TotalStatsCard.tsx'
-import { useSearch } from '@tanstack/react-router'
-import { toast } from 'sonner'
+import { useFiles } from '@/hooks/queries/file.ts'
+
+import { Button } from './components/ui/button.tsx'
 
 function App() {
   const pageParam = useSearch({ from: '/', select: (state) => state.page })

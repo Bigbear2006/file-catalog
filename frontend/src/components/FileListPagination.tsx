@@ -1,3 +1,6 @@
+import { Link } from '@tanstack/react-router'
+import type { Dispatch, SetStateAction } from 'react'
+
 import {
   Pagination,
   PaginationContent,
@@ -6,8 +9,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination.tsx'
-import type { Dispatch, SetStateAction } from 'react'
-import { Link } from '@tanstack/react-router'
 
 interface FileListPaginationProps {
   page: number

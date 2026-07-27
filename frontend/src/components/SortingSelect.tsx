@@ -1,3 +1,5 @@
+import type { Dispatch, SetStateAction } from 'react'
+
 import type { FileSorting, SortingOrder } from '@/api/file.ts'
 import {
   Select,
@@ -8,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select.tsx'
-import type { Dispatch, SetStateAction } from 'react'
 
 const SORTING = [
   { value: null, label: 'Без сортировки' },

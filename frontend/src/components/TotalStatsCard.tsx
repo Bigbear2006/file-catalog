@@ -1,4 +1,5 @@
 import type { FileList } from '@/api/file.ts'
+import { NumberStartCard } from '@/components/NumberStartCard.tsx'
 import {
   Card,
   CardContent,
@@ -6,7 +7,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card.tsx'
-import { NumberStartCard } from '@/components/NumberStartCard.tsx'
 
 interface TotalStatsCardProps {
   fileList: FileList
