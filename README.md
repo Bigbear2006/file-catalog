@@ -6,6 +6,8 @@ https://file-catalog.classflow.ru/api/docs
 
 ### Мой телеграм: @bigbeardev
 
+![Демонстрация](example.mp4)
+
 ## Стек
 
 ### Backend
@@ -13,6 +15,7 @@ https://file-catalog.classflow.ru/api/docs
 - FastAPI
 - SQLAlchemy
 - Alembic
+- Dishka
 - PostgreSQL
 - Docker
 - Nginx
