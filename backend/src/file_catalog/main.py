@@ -1,3 +1,4 @@
+import os
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
@@ -25,7 +26,9 @@ from file_catalog.services import FileService
 async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
     engine = await container.get(AsyncEngine)
     sessionmaker = await container.get(async_sessionmaker[AsyncSession])
+
     config = container.get_sync(Config)
+    os.makedirs(config.FILES_DIR, exist_ok=True)
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
