@@ -29,17 +29,16 @@ export function useDownloadFilesMutation({
 
             await markDownloadedFiles({ names: fileNamesChunk })
             await queryClient.invalidateQueries({ queryKey: ['files'] })
-
-            const fileNamesResponse = await getFileNames()
-            fileNames = fileNamesResponse.names
           }
+          const fileNamesResponse = await getFileNames()
+          fileNames = fileNamesResponse.names
         }
       } catch (err) {
         if (!isAxiosError(err) || !err.response) {
           throw err
         }
 
-        const retryAfter = parseInt(err.response.headers['Retry-After'])
+        const retryAfter = parseInt(err.response.headers['retry-after'])
         const retryAfterStr = Number.isNaN(retryAfter)
           ? ''
           : ` Попробуйте снова через ${retryAfter} секунд`
