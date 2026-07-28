@@ -14,8 +14,8 @@ from file_catalog.logging import configure_logging, logger
 from file_catalog.services.file import load_files
 
 ALLOWED_ORIGINS = [
-    'localhost:5173',
-    'localhost:3000',
+    'http://localhost:5173',
+    'http://localhost:3000',
 ]
 
 

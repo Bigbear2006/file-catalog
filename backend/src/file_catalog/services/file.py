@@ -152,23 +152,13 @@ class FileService:
             first_download_stmt
         )
 
-        offset = (page - 1) * PAGE_SIZE
-        limit = offset + PAGE_SIZE
-        stmt = (
+        all_files_stmt = (
             select(DownloadedFile)
             .options(joinedload(DownloadedFile.file))
             .where(DownloadedFile.candidate_id == candidate_id)
-            .offset(offset)
-            .limit(limit)
         )
-
-        if sorting == FileSorting.DOWNLOADED_AT:
-            col = DownloadedFile.created_at
-            order_by = col.asc() if order == SortingOrder.ASC else col.desc()
-            stmt = stmt.order_by(order_by)
-
-        result = await self.session.execute(stmt)
-        files = result.scalars().all()
+        all_files_result = await self.session.execute(all_files_stmt)
+        all_files = all_files_result.scalars().all()
 
         stats_by_file_id = {}
         general_stats = None
@@ -180,7 +170,7 @@ class FileService:
                     )
                     for number in string.digits
                 ]
-                for f in files
+                for f in all_files
                 if isinstance(with_stats, bool) or f.file.id in with_stats
             }
 
@@ -194,6 +184,24 @@ class FileService:
                 NumberStatsResponse(number=number, count=count)
                 for number, count in general_stats_dict.items()
             ]
+
+        offset = (page - 1) * PAGE_SIZE
+        limit = offset + PAGE_SIZE
+        files_stmt = (
+            select(DownloadedFile)
+            .options(joinedload(DownloadedFile.file))
+            .where(DownloadedFile.candidate_id == candidate_id)
+            .offset(offset)
+            .limit(limit)
+        )
+
+        if sorting == FileSorting.DOWNLOADED_AT:
+            col = DownloadedFile.created_at
+            order_by = col.asc() if order == SortingOrder.ASC else col.desc()
+            files_stmt = files_stmt.order_by(order_by)
+
+        files_result = await self.session.execute(files_stmt)
+        files = files_result.scalars().all()
 
         file_list = [
             FileResponse(
