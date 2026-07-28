@@ -18,37 +18,58 @@ class CandidateService:
         self.request = request
         self.config = config
 
+    async def get_candidate(
+        self,
+        x_candidate_id: str | None = None,
+        ip_address: str | None = None,
+    ) -> Candidate | None:
+        if x_candidate_id:
+            stmt = select(Candidate).where(
+                Candidate.identifier == x_candidate_id
+            )
+            result = await self.session.execute(stmt)
+            candidate = result.scalar_one_or_none()
+            if candidate:
+                return candidate
+
+        if ip_address:
+            stmt = (
+                select(Candidate)
+                .where(Candidate.ip_address == ip_address)
+                .order_by(Candidate.created_at.desc())
+                .limit(1)
+            )
+            result = await self.session.execute(stmt)
+            return result.scalar_one_or_none()
+
+        return None
+
     async def get_or_create_candidate(
         self,
         x_candidate_id: str | None = None,
         ip_address: str | None = None,
     ) -> Candidate:
-        filter_ = Candidate.ip_address == ip_address
-        if x_candidate_id:
-            filter_ |= Candidate.identifier == x_candidate_id
-
-        stmt = select(Candidate).where(filter_)
-        result = await self.session.execute(stmt)
-        candidate = result.scalar_one_or_none()
-
+        candidate = await self.get_candidate(x_candidate_id, ip_address)
         if candidate:
             if ip_address and not candidate.ip_address:
                 candidate.ip_address = ip_address
                 await self.session.commit()
             return candidate
 
-        candidate = Candidate(
-            identifier=x_candidate_id or '',
-            ip_address=ip_address,
-        )
+        candidate = Candidate(identifier=x_candidate_id, ip_address=ip_address)
         self.session.add(candidate)
         await self.session.commit()
         logger.info(f'Created candidate {candidate}')
         return candidate
 
+    def get_client_ip(self) -> str | None:
+        if self.request.client:
+            return self.request.client.host
+        return self.request.headers.get('X-Real-IP')
+
     async def get_current_candidate(self) -> Candidate:
         x_candidate_id = self.request.headers.get('X-Candidate-Id')
-        ip_address = self.request.client.host if self.request.client else None
+        ip_address = self.get_client_ip()
         candidate = await self.get_or_create_candidate(
             x_candidate_id=x_candidate_id,
             ip_address=ip_address,

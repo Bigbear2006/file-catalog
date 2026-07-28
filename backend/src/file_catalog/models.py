@@ -52,7 +52,7 @@ class Candidate(Base):
 
     # X-Candidate-Id
     identifier: Mapped[str] = mapped_column(
-        String(255), unique=True, nullable=False, index=True
+        String(255), unique=True, nullable=True
     )
     ip_address: Mapped[str | None] = mapped_column(String(45), nullable=True)
     blocked_until: Mapped[datetime | None] = mapped_column(
