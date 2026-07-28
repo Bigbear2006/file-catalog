@@ -76,7 +76,17 @@ async def get_downloaded_files(
     data: Annotated[GetDownloadedFilesRequest, Query()],
     file_service: FromDishka[FileService],
 ) -> FileListResponse:
-    return await file_service.get_downloaded_files(**data.model_dump())
+    if data.with_stats and isinstance(data.with_stats[0], bool):
+        with_stats = data.with_stats[0]
+    else:
+        with_stats = data.with_stats  # type: ignore[assignment]
+
+    return await file_service.get_downloaded_files(
+        page=data.page,
+        sorting=data.sorting,
+        order=data.order,
+        with_stats=with_stats,
+    )
 
 
 @file_router.post(

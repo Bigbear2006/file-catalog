@@ -6,7 +6,8 @@ https://file-catalog.classflow.ru/api/docs
 
 ### Мой телеграм: @bigbeardev
 
-![Демонстрация](example.mp4)
+![Демонстрация](example-1.png)
+![Демонстрация](example-2.png)
 
 ## Стек
 

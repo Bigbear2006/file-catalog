@@ -102,4 +102,7 @@ class GetDownloadedFilesRequest(BaseModel):
     page: int = 1
     sorting: FileSorting | None = None
     order: SortingOrder = SortingOrder.DESC
-    with_stats: Annotated[list[int] | bool, Query(alias='withStats')] = False
+    with_stats: Annotated[
+        list[int] | list[bool],
+        Query(alias='withStats', default_factory=lambda: [False]),
+    ]
