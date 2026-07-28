@@ -5,14 +5,18 @@ import uvicorn
 from dishka import AsyncContainer
 from dishka.integrations.fastapi import setup_dishka
 from fastapi import FastAPI
-from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.middleware.cors import CORSMiddleware
 
 from file_catalog.api import api_router
 from file_catalog.api.exceptions import setup_exception_handler
 from file_catalog.di.container import container
 from file_catalog.logging import configure_logging, logger
-from file_catalog.middleware import cors_middleware
 from file_catalog.services.file import load_files
+
+ALLOWED_ORIGINS = [
+    'localhost:5173',
+    'localhost:3000',
+]
 
 
 @asynccontextmanager
@@ -32,7 +36,13 @@ def create_app(_container: AsyncContainer) -> FastAPI:
         lifespan=lifespan,
     )
     app.include_router(api_router)
-    app.add_middleware(BaseHTTPMiddleware, dispatch=cors_middleware)
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=ALLOWED_ORIGINS,
+        allow_methods=['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'],
+        allow_headers=['Content-Type'],
+        expose_headers=['Retry-After'],
+    )
     setup_exception_handler(app)
     setup_dishka(_container, app)
     return app

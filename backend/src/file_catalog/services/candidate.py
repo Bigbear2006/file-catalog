@@ -63,9 +63,22 @@ class CandidateService:
         return candidate
 
     def get_client_ip(self) -> str | None:
+        logger.info(
+            f'Client IP: {self.request.client}\n'
+            f'X-Forwarded-For: {self.request.headers.get("X-Forwarded-For")}\n'
+            f'X-Real-IP: {self.request.headers.get("X-Real-IP")}\n'
+        )
+
+        if forwarded := self.request.headers.get('X-Forwarded-For'):
+            return forwarded.split(',')[0].strip()
+
+        if real_ip := self.request.headers.get('X-Real-IP'):
+            return real_ip
+
         if self.request.client:
             return self.request.client.host
-        return self.request.headers.get('X-Real-IP')
+
+        return None
 
     async def get_current_candidate(self) -> Candidate:
         x_candidate_id = self.request.headers.get('X-Candidate-Id')
