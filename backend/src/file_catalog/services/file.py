@@ -5,6 +5,7 @@ import random
 import string
 import uuid
 import zipfile
+from datetime import datetime
 from pathlib import Path
 
 from dishka import AsyncContainer
@@ -111,6 +112,10 @@ class FileService:
             raise FileNotFound(missing.pop())
 
         return list(files)
+
+    def get_random_filename(self) -> str:
+        dt = datetime.now(self.config.TZ)
+        return dt.strftime('files-%Y-%m-%dT%H-%M-%S-%f.zip')
 
     async def create_zip_archive(self, files: list[File]) -> bytes:
         zip_buffer = io.BytesIO()

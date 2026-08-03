@@ -13,6 +13,8 @@ import { TotalStatsCard } from '@/components/TotalStatsCard.tsx'
 import { useFiles } from '@/hooks/queries/file.ts'
 
 import { Button } from './components/ui/button.tsx'
+import { isAxiosError } from 'axios'
+import { displayRetryAfter } from '@/lib/retry.ts'
 
 function App() {
   const page = useSearch({ from: '/', select: (state) => state.page }) || 1
@@ -24,7 +26,7 @@ function App() {
     number[] | boolean
   >([])
 
-  const { data: fileList } = useFiles({
+  const { data: fileList, error } = useFiles({
     page,
     sorting,
     order,
@@ -34,8 +36,25 @@ function App() {
   if (!fileList) {
     return (
       <div className="py-20 flex gap-4 text-center justify-center items-center">
-        <Loader className="animate-spin-slow" size={40} />
-        <h1 className="text-xl">Загрузка...</h1>
+        {error ? (
+          isAxiosError(error) && error.response ? (
+            <p className="text-xl font-semibold text-balance">
+              {displayRetryAfter(error.response)}
+            </p>
+          ) : (
+            <div className="flex flex-col">
+              <p className="text-xl font-semibold text-balance">
+                Что-то пошло не так...
+              </p>
+              <p>{error.message}</p>
+            </div>
+          )
+        ) : (
+          <>
+            <Loader className="animate-spin-slow" size={40} />
+            <h1 className="text-xl">Загрузка...</h1>
+          </>
+        )}
       </div>
     )
   }

@@ -59,13 +59,13 @@ async def download_files(
     об этом нужно отдельно сообщить ручкой `POST /api/files/downloaded`."""
 
     files = await file_service.get_files_by_names(data.names)
-
     zip_content = await file_service.create_zip_archive(files)
+    filename = file_service.get_random_filename()
     return Response(
         content=zip_content,
         media_type='application/zip',
         headers={
-            'Content-Disposition': 'attachment; filename="files.zip"',
+            'Content-Disposition': f'attachment; filename="{filename}"',
             'Content-Length': str(len(zip_content)),
         },
     )

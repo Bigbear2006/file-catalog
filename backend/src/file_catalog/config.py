@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from environs import env
 
@@ -24,6 +25,8 @@ class Config:
     RATE_LIMIT_REQUESTS: int = 20
     RATE_LIMIT_WINDOW_SECONDS: int = 5
     BLOCK_DURATION_SECONDS: int = 1800
+
+    TZ: ZoneInfo = field(default_factory=lambda: ZoneInfo('Asia/Novosibirsk'))
 
     @property
     def database_url(self) -> str:

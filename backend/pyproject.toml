@@ -12,6 +12,7 @@ dependencies = [
     "alembic>=1.13.0",
     "environs>=11.0.0",
     "dishka>=1.10.1",
+    "tzdata>=2026.3",
 ]
 
 [dependency-groups]
