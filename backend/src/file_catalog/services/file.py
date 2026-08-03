@@ -119,12 +119,7 @@ class FileService:
             zip_buffer, 'w', zipfile.ZIP_DEFLATED
         ) as zip_file:
             for file in files:
-                file_path = self.config.FILES_DIR / file.name
-                if file_path.exists():
-                    with open(file_path, 'rb') as f:
-                        zip_file.writestr(file.name, f.read())
-                else:
-                    zip_file.writestr(file.name, file.content)
+                zip_file.writestr(file.name, file.content)
 
         zip_buffer.seek(0)
         return zip_buffer.read()
@@ -228,7 +223,10 @@ class FileService:
         result = await self.session.scalars(
             select(DownloadedFile)
             .join(File)
-            .where(File.name.in_(names))
+            .where(
+                File.name.in_(names),
+                DownloadedFile.candidate_id == candidate_id,
+            )
             .options(contains_eager(DownloadedFile.file))
         )
         already_downloaded = result.all()
