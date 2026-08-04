@@ -23,10 +23,14 @@ export function useDownloadFilesMutation({
           for (let i = 0; i < Math.ceil(fileNames.length / 3); i++) {
             const fileNamesChunk = fileNames.slice(i * 3, i * 3 + 3)
 
-            const { data: zipData } = await downloadFiles({
+            const { data: zipData, headers } = await downloadFiles({
               names: fileNamesChunk,
             })
-            downloadZipArchive(zipData)
+            const contentDisposition =
+              headers['content-disposition'] ||
+              'attachment; filename="files.zip"'
+            const zipName = contentDisposition.split('"')[1]
+            downloadZipArchive(zipData, zipName)
 
             await markDownloadedFiles({ names: fileNamesChunk })
             await queryClient.invalidateQueries({ queryKey: ['files'] })
@@ -45,12 +49,12 @@ export function useDownloadFilesMutation({
   })
 }
 
-function downloadZipArchive(data: any) {
+function downloadZipArchive(data: any, filename: string) {
   const blob = new Blob([data], { type: 'application/zip' })
   const url = window.URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url
-  link.download = 'files.zip'
+  link.download = filename
   document.body.appendChild(link)
   link.click()
   link.remove()

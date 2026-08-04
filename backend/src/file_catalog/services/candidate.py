@@ -1,3 +1,4 @@
+import math
 from datetime import UTC, datetime, timedelta
 
 from fastapi import Request
@@ -24,8 +25,10 @@ class CandidateService:
         ip_address: str | None = None,
     ) -> Candidate | None:
         if x_candidate_id:
-            stmt = select(Candidate).where(
-                Candidate.identifier == x_candidate_id
+            stmt = (
+                select(Candidate)
+                .where(Candidate.identifier == x_candidate_id)
+                .with_for_update()
             )
             result = await self.session.execute(stmt)
             candidate = result.scalar_one_or_none()
@@ -37,6 +40,7 @@ class CandidateService:
                 select(Candidate)
                 .where(Candidate.ip_address == ip_address)
                 .order_by(Candidate.created_at.desc())
+                .with_for_update()
                 .limit(1)
             )
             result = await self.session.execute(stmt)
@@ -60,6 +64,13 @@ class CandidateService:
         self.session.add(candidate)
         await self.session.commit()
         logger.info(f'Created candidate {candidate}')
+
+        # Select created candidate with FOR UPDATE lock
+        candidate = await self.get_candidate(
+            candidate.identifier, candidate.ip_address
+        )
+        if not candidate:
+            raise RuntimeError('Cannot select created candidate')
         return candidate
 
     def get_client_ip(self) -> str | None:
@@ -101,7 +112,9 @@ class CandidateService:
         )
 
         if candidate.blocked_until and candidate.blocked_until > now:
-            retry_after = int((candidate.blocked_until - now).total_seconds())
+            retry_after = math.ceil(
+                (candidate.blocked_until - now).total_seconds()
+            )
             raise RateLimitExceeded(retry_after=retry_after, blocked=True)
 
         # Check request count in current window
@@ -109,6 +122,18 @@ class CandidateService:
             candidate.last_request_at
             and candidate.last_request_at >= window_start
         ):
+            # If the candidate exceeds 50% of the request limit,
+            # trigger a temporary block to slow down the client
+            if candidate.request_count > (
+                self.config.RATE_LIMIT_REQUESTS // 2
+            ):
+                candidate.request_count += 1
+                candidate.last_request_at = now
+                await self.session.commit()
+                raise RateLimitExceeded(
+                    retry_after=self.config.RATE_LIMIT_WINDOW_SECONDS,
+                )
+
             if candidate.request_count >= self.config.RATE_LIMIT_REQUESTS:
                 candidate.blocked_until = now + timedelta(
                     seconds=self.config.BLOCK_DURATION_SECONDS

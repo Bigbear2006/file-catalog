@@ -147,7 +147,9 @@ class FileService:
         total_result = await self.session.execute(total_stmt)
         total_count = total_result.scalar() or 0
 
-        first_download_stmt = select(func.min(DownloadedFile.created_at))
+        first_download_stmt = select(
+            func.min(DownloadedFile.created_at)
+        ).where(DownloadedFile.candidate_id == candidate_id)
         first_file_downloaded_at = await self.session.scalar(
             first_download_stmt
         )
@@ -186,13 +188,12 @@ class FileService:
             ]
 
         offset = (page - 1) * PAGE_SIZE
-        limit = offset + PAGE_SIZE
         files_stmt = (
             select(DownloadedFile)
             .options(joinedload(DownloadedFile.file))
             .where(DownloadedFile.candidate_id == candidate_id)
             .offset(offset)
-            .limit(limit)
+            .limit(PAGE_SIZE)
         )
 
         if sorting == FileSorting.DOWNLOADED_AT:

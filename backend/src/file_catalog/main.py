@@ -41,7 +41,7 @@ def create_app(_container: AsyncContainer) -> FastAPI:
         allow_origins=ALLOWED_ORIGINS,
         allow_methods=['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'],
         allow_headers=['Content-Type'],
-        expose_headers=['Retry-After'],
+        expose_headers=['Retry-After', 'Content-Disposition'],
     )
     setup_exception_handler(app)
     setup_dishka(_container, app)
